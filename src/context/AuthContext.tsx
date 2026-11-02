@@ -1,12 +1,41 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
-import { User, UserRole } from '../types';
+import { User } from '../types';
+
+export interface VerifyStep1Response {
+  success: boolean;
+  step: 'OTP_REQUIRED';
+  tempToken: string;
+  deliveryChannel: 'SMS' | 'EMAIL';
+  maskedTarget: string;
+  demoOtp: string;
+  userPreview: {
+    name: string;
+    role: string;
+    designation: string;
+    bureau: string;
+  };
+  message: string;
+}
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   demoUsers: User[];
   login: (email: string, password?: string) => Promise<void>;
+  verifyCredentialsAndSendOtp: (payload: {
+    loginId: string;
+    password: string;
+    captchaAnswer: string;
+    expectedCaptcha: string;
+    deliveryChannel: 'SMS' | 'EMAIL';
+  }) => Promise<VerifyStep1Response>;
+  verifyOtpAndLogin: (payload: { tempToken: string; otp: string }) => Promise<void>;
+  resendOtp: (payload: { tempToken: string; deliveryChannel: 'SMS' | 'EMAIL' }) => Promise<{
+    demoOtp: string;
+    maskedTarget: string;
+    message: string;
+  }>;
   logout: () => void;
   switchUser: (targetUser: User) => Promise<void>;
   loading: boolean;
@@ -14,7 +43,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Initial fallback mock user if offline/initializing
 const DEFAULT_ADMIN: User = {
   id: 'usr-admin-1',
   name: 'Dr. Abhay Jere',
@@ -50,6 +78,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadDemoUsers();
   }, []);
 
+  // Step 1: Verify Credentials + CAPTCHA
+  const verifyCredentialsAndSendOtp = async (payload: {
+    loginId: string;
+    password: string;
+    captchaAnswer: string;
+    expectedCaptcha: string;
+    deliveryChannel: 'SMS' | 'EMAIL';
+  }): Promise<VerifyStep1Response> => {
+    const res = await api.post('/auth/verify-step1', payload);
+    return res.data;
+  };
+
+  // Step 2: Verify 2FA OTP & complete login
+  const verifyOtpAndLogin = async (payload: { tempToken: string; otp: string }) => {
+    const res = await api.post('/auth/verify-otp', payload);
+    const { token: receivedToken, user: receivedUser } = res.data;
+
+    localStorage.setItem('augms_token', receivedToken);
+    localStorage.setItem('augms_user', JSON.stringify(receivedUser));
+
+    setToken(receivedToken);
+    setUser(receivedUser);
+  };
+
+  // Resend OTP
+  const resendOtp = async (payload: { tempToken: string; deliveryChannel: 'SMS' | 'EMAIL' }) => {
+    const res = await api.post('/auth/resend-otp', payload);
+    return res.data;
+  };
+
+  // Direct login
   const login = async (email: string, password = 'aicte@123') => {
     try {
       const res = await api.post('/auth/login', { email, password });
@@ -75,17 +134,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const switchUser = async (targetUser: User) => {
     try {
-      // Re-authenticate as target demo user
       await login(targetUser.email, 'aicte@123');
     } catch (err) {
-      // Fallback local switch
       setUser(targetUser);
       localStorage.setItem('augms_user', JSON.stringify(targetUser));
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, demoUsers, login, logout, switchUser, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        demoUsers,
+        login,
+        verifyCredentialsAndSendOtp,
+        verifyOtpAndLogin,
+        resendOtp,
+        logout,
+        switchUser,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
