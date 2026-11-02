@@ -16,6 +16,7 @@ import {
   Shield,
   Layers,
   Scale,
+  User,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
@@ -79,6 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => 
     },
     { name: 'User Management', path: '/users', icon: Users, roleRestricted: ['SUPER_ADMIN', 'SENIOR_OFFICIAL'] },
     { name: 'Audit Logs', path: '/audit-logs', icon: ShieldAlert },
+    { name: 'My Profile', path: '/profile', icon: User },
     { name: 'Settings', path: '/settings', icon: Settings, roleRestricted: ['SUPER_ADMIN'] },
   ];
 
@@ -106,17 +108,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => 
 
       {/* Bureau / Role Pill for Active User */}
       {!collapsed && user && (
-        <div className="mx-3 mt-3 p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-blue-950 border border-blue-500/40 text-blue-300 flex items-center justify-center text-xs font-bold">
-            {user.bureau ? user.bureau.code : 'HQ'}
+        <button
+          onClick={() => navigate('/profile')}
+          className="mx-3 mt-3 p-2.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-blue-500/50 flex items-center gap-2.5 transition-all text-left group"
+          title="View & Edit Official Profile"
+        >
+          <div className="w-8 h-8 rounded-full bg-blue-950 border border-blue-500/40 text-blue-300 flex items-center justify-center text-xs font-bold overflow-hidden flex-shrink-0">
+            {user.avatar ? (
+              <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+            ) : (
+              <span>{user.bureau ? user.bureau.code : 'HQ'}</span>
+            )}
           </div>
           <div className="overflow-hidden leading-tight flex-1">
-            <p className="text-xs font-semibold text-slate-200 truncate">{user.name}</p>
+            <p className="text-xs font-semibold text-slate-200 group-hover:text-white truncate">{user.name}</p>
             <p className="text-[10px] text-amber-400 uppercase tracking-wider font-mono truncate">
               {user.role.replace(/_/g, ' ')}
             </p>
           </div>
-        </div>
+          <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+        </button>
       )}
 
       {/* Navigation List */}

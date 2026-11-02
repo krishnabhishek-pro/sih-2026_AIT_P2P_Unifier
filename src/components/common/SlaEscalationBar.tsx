@@ -179,3 +179,4 @@ export const SlaEscalationBar: React.FC<SlaEscalationBarProps> = ({
     </div>
   );
 };
+

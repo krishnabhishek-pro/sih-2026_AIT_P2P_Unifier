@@ -38,6 +38,7 @@ interface AuthContextType {
   }>;
   logout: () => void;
   switchUser: (targetUser: User) => Promise<void>;
+  updateProfile: (updatedData: Partial<User> & { currentPassword?: string; newPassword?: string }) => Promise<User>;
   loading: boolean;
 }
 
@@ -141,6 +142,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateProfile = async (
+    updatedData: Partial<User> & { currentPassword?: string; newPassword?: string }
+  ): Promise<User> => {
+    try {
+      const res = await api.put('/users/profile', {
+        userId: user?.id,
+        email: user?.email,
+        ...updatedData,
+      });
+      const updatedUser = res.data;
+      setUser(updatedUser);
+      localStorage.setItem('augms_user', JSON.stringify(updatedUser));
+      return updatedUser;
+    } catch (err: any) {
+      if (user) {
+        const merged = { ...user, ...updatedData };
+        setUser(merged);
+        localStorage.setItem('augms_user', JSON.stringify(merged));
+        return merged;
+      }
+      throw err;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -153,6 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         resendOtp,
         logout,
         switchUser,
+        updateProfile,
         loading,
       }}
     >

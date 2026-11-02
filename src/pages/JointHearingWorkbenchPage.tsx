@@ -458,3 +458,4 @@ export const JointHearingWorkbenchPage: React.FC = () => {
     </div>
   );
 };
+

@@ -10,6 +10,9 @@ import {
   AlertTriangle,
   Menu,
   ExternalLink,
+  Camera,
+  LogOut,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
@@ -27,12 +30,14 @@ export const Header: React.FC<HeaderProps> = ({ collapsed, setCollapsed }) => {
 
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState('');
 
   const roleMenuRef = useRef<HTMLDivElement>(null);
   const notifMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Close menus on outside click
   useEffect(() => {
@@ -42,6 +47,9 @@ export const Header: React.FC<HeaderProps> = ({ collapsed, setCollapsed }) => {
       }
       if (notifMenuRef.current && !notifMenuRef.current.contains(event.target as Node)) {
         setNotifMenuOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -104,6 +112,9 @@ export const Header: React.FC<HeaderProps> = ({ collapsed, setCollapsed }) => {
   } else if (path.startsWith('/settings')) {
     pageTitle = 'System Settings';
     breadcrumb = 'Administration / Overlap Parameters & Rule Weights';
+  } else if (path.startsWith('/profile')) {
+    pageTitle = 'Official Profile & Identity';
+    breadcrumb = 'Account / Edit Profile, Avatar & Statutory Clearance';
   }
 
   return (
@@ -248,19 +259,91 @@ export const Header: React.FC<HeaderProps> = ({ collapsed, setCollapsed }) => {
             )}
           </div>
 
-          {/* User Profile Avatar */}
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-            <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center">
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-              ) : (
-                <UserIcon className="w-4 h-4 text-slate-600" />
-              )}
-            </div>
-            <div className="hidden xl:block text-left leading-tight">
-              <p className="text-xs font-bold text-slate-900">{user?.name || 'AICTE Officer'}</p>
-              <p className="text-[10px] text-slate-500">{user?.designation || 'Monitoring Official'}</p>
-            </div>
+          {/* User Profile Avatar with Interactive Dropdown */}
+          <div className="relative pl-2 border-l border-slate-200" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-100 transition-colors text-left focus:outline-none"
+              title="Official Profile & Account Menu"
+            >
+              <div className="relative">
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center shadow-xs">
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <UserIcon className="w-4 h-4 text-slate-600" />
+                  )}
+                </div>
+                <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 border border-white" />
+              </div>
+              <div className="hidden xl:block text-left leading-tight">
+                <p className="text-xs font-bold text-slate-900 truncate max-w-[140px]">{user?.name || 'AICTE Officer'}</p>
+                <p className="text-[10px] text-slate-500 truncate max-w-[140px]">{user?.designation || 'Monitoring Official'}</p>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden xl:block" />
+            </button>
+
+            {/* Profile Dropdown Menu */}
+            {userMenuOpen && (
+              <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-white shadow-2xl border border-slate-200 p-2 z-50 animate-in fade-in slide-in-from-top-2">
+                {/* Official ID Header */}
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3 mb-2">
+                  <div className="w-11 h-11 rounded-xl overflow-hidden border border-slate-200 bg-slate-200 flex-shrink-0">
+                    {user?.avatar ? (
+                      <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <UserIcon className="w-6 h-6 text-slate-600 m-2.5" />
+                    )}
+                  </div>
+                  <div className="overflow-hidden leading-tight flex-1">
+                    <p className="text-xs font-bold text-slate-900 truncate">{user?.name}</p>
+                    <p className="text-[10px] font-mono font-bold text-blue-700 truncate">{user?.employeeId || 'AICTE/HQ/001'}</p>
+                    <p className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider mt-0.5">
+                      {user?.role.replace(/_/g, ' ')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-1">
+                  <button
+                    onClick={() => {
+                      navigate('/profile');
+                      setUserMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                  >
+                    <UserIcon className="w-4 h-4 text-blue-600" />
+                    <span>View & Edit Official Profile</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      navigate('/profile');
+                      setUserMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                  >
+                    <Camera className="w-4 h-4 text-purple-600" />
+                    <span>Change Profile Photo</span>
+                  </button>
+                </div>
+
+                {/* Sign Out */}
+                <div className="pt-2 mt-2 border-t border-slate-100">
+                  <button
+                    onClick={() => {
+                      logout();
+                      setUserMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

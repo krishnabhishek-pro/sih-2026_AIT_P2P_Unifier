@@ -416,3 +416,4 @@ export const GisHotspotMap: React.FC<GisHotspotMapProps> = ({
     </div>
   );
 };
+

@@ -12,6 +12,7 @@ import { NotificationsPage } from './pages/NotificationsPage';
 import { UserManagementPage } from './pages/UserManagementPage';
 import { AuditLogsPage } from './pages/AuditLogsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { JointHearingWorkbenchPage } from './pages/JointHearingWorkbenchPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -62,6 +63,7 @@ export function App() {
             <Route path="users" element={<UserManagementPage />} />
             <Route path="audit-logs" element={<AuditLogsPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

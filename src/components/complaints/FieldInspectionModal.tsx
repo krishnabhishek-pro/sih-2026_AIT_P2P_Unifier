@@ -377,3 +377,4 @@ export const FieldInspectionModal: React.FC<FieldInspectionModalProps> = ({
     </Modal>
   );
 };
+
