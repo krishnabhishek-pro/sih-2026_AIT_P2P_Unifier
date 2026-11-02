@@ -17,6 +17,7 @@ import api from '../services/api';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { PriorityBadge } from '../components/common/PriorityBadge';
 import { BureauBadge } from '../components/common/BureauBadge';
+import { SlaEscalationBar } from '../components/common/SlaEscalationBar';
 import { ComplaintDetailsModal } from './ComplaintDetailsModal';
 import { RegisterComplaintModal } from './RegisterComplaintModal';
 import { Complaint } from '../types';
@@ -224,7 +225,7 @@ export const ComplaintsPage: React.FC = () => {
                 <th className="py-3 px-4">Category</th>
                 <th className="py-3 px-4">Assigned Bureau</th>
                 <th className="py-3 px-4">Officer</th>
-                <th className="py-3 px-4">Due Date</th>
+                <th className="py-3 px-4 w-36">Statutory SLA (30d)</th>
                 <th className="py-3 px-4">Priority</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-right">Action</th>
@@ -272,14 +273,8 @@ export const ComplaintsPage: React.FC = () => {
                       <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap">
                         {c.assignedOfficer ? c.assignedOfficer.name : <span className="text-slate-400 italic">Unassigned</span>}
                       </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap font-medium">
-                        <span className={isOverdue ? 'text-rose-600 font-bold' : 'text-slate-600'}>
-                          {new Date(c.dueDate).toLocaleDateString('en-IN', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </span>
+                      <td className="py-3.5 px-4 w-36">
+                        <SlaEscalationBar complaint={c} variant="compact" />
                       </td>
                       <td className="py-3.5 px-4">
                         <PriorityBadge priority={c.priority} />

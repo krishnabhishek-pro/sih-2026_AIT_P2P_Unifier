@@ -16,12 +16,20 @@ import {
   Download,
   AlertCircle,
   ExternalLink,
+  Camera,
+  Globe,
+  ShieldAlert,
+  Scale,
 } from 'lucide-react';
 import api from '../services/api';
 import { Modal } from '../components/common/Modal';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { PriorityBadge } from '../components/common/PriorityBadge';
 import { BureauBadge } from '../components/common/BureauBadge';
+import { SlaEscalationBar } from '../components/common/SlaEscalationBar';
+import { AiNoticeGeneratorModal } from '../components/complaints/AiNoticeGeneratorModal';
+import { FieldInspectionModal } from '../components/complaints/FieldInspectionModal';
+import { NationalIntegrationsDrawer } from '../components/complaints/NationalIntegrationsDrawer';
 import { useAuth } from '../context/AuthContext';
 import { Complaint, Bureau, User as UserType } from '../types';
 
@@ -55,6 +63,11 @@ export const ComplaintDetailsModal: React.FC<ComplaintDetailsModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Advanced modules state
+  const [showNoticeModal, setShowNoticeModal] = useState(false);
+  const [showInspectionModal, setShowInspectionModal] = useState(false);
+  const [showNationalSyncModal, setShowNationalSyncModal] = useState(false);
 
   const loadData = async () => {
     try {
@@ -269,6 +282,56 @@ export const ComplaintDetailsModal: React.FC<ComplaintDetailsModalProps> = ({
               {new Date(complaint.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
               {isOverdue && ' (Breached)'}
             </p>
+          </div>
+        </div>
+
+        {/* Feature: Automated Statutory SLA Escalation Matrix */}
+        <SlaEscalationBar
+          complaint={complaint}
+          variant="full"
+          onEscalate={async () => {
+            await api.post(`/complaints/${complaintId}/remarks`, {
+              remarks: 'Statutory SLA fast-track escalation triggered. Case submitted to Chairman / Member Secretary AICTE.',
+            });
+            await loadData();
+          }}
+        />
+
+        {/* Specialized Legal & Regulatory Tools Bar */}
+        <div className="p-3 bg-gradient-to-r from-slate-900 to-blue-950 rounded-xl text-white flex flex-wrap items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+              Statutory Workbench:
+            </span>
+            <span className="text-xs text-slate-300">
+              Direct regulatory enforcement actions
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setShowNoticeModal(true)}
+              className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span>Draft Show-Cause Notice</span>
+            </button>
+
+            <button
+              onClick={() => setShowInspectionModal(true)}
+              className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              <span>Spot Field Inspection</span>
+            </button>
+
+            <button
+              onClick={() => setShowNationalSyncModal(true)}
+              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>National Portals (CPGRAMS/NAD)</span>
+            </button>
           </div>
         </div>
 
@@ -599,6 +662,39 @@ export const ComplaintDetailsModal: React.FC<ComplaintDetailsModalProps> = ({
               ))}
             </div>
           </div>
+        )}
+
+        {/* AI Statutory Notice Generator Modal */}
+        {showNoticeModal && (
+          <AiNoticeGeneratorModal
+            complaint={complaint}
+            onClose={() => setShowNoticeModal(false)}
+            onNoticeIssued={async () => {
+              await loadData();
+              onUpdate?.();
+            }}
+          />
+        )}
+
+        {/* Mobile Field Spot Inspection Modal */}
+        {showInspectionModal && (
+          <FieldInspectionModal
+            complaint={complaint}
+            onClose={() => setShowInspectionModal(false)}
+            onInspectionSubmitted={async () => {
+              await loadData();
+              onUpdate?.();
+            }}
+          />
+        )}
+
+        {/* National Portals Inter-Agency Drawer */}
+        {showNationalSyncModal && (
+          <NationalIntegrationsDrawer
+            complaint={complaint}
+            isOpen={showNationalSyncModal}
+            onClose={() => setShowNationalSyncModal(false)}
+          />
         )}
       </div>
     </Modal>

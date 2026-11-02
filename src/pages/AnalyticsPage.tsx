@@ -11,7 +11,11 @@ import {
   RefreshCw,
   Printer,
   FileSpreadsheet,
+  MapPin,
+  ShieldAlert,
 } from 'lucide-react';
+import { GisHotspotMap } from '../components/analytics/GisHotspotMap';
+import { ExecutiveDossierModal } from '../components/analytics/ExecutiveDossierModal';
 import {
   ResponsiveContainer,
   LineChart,
@@ -33,6 +37,7 @@ export const AnalyticsPage: React.FC = () => {
   const [data, setData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('FY 2025-26');
+  const [executiveDossierOpen, setExecutiveDossierOpen] = useState(false);
 
   const fetchAnalytics = async () => {
     try {
@@ -109,6 +114,14 @@ export const AnalyticsPage: React.FC = () => {
             <option value="Past 90 Days">Past 90 Days</option>
           </select>
           <button
+            onClick={() => setExecutiveDossierOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs shadow-sm transition-all"
+            title="Generate AICTE Council / EC Board Meeting Dossier"
+          >
+            <ShieldAlert className="w-4 h-4 text-purple-300" />
+            <span>EC Board Dossier</span>
+          </button>
+          <button
             onClick={handleExportCSV}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors"
             title="Download CSV Dataset"
@@ -149,6 +162,11 @@ export const AnalyticsPage: React.FC = () => {
           <div className="text-2xl font-black text-amber-600 mt-1">{s.totalOverlaps}</div>
           <span className="text-[11px] text-amber-700 font-semibold">{s.confirmedOverlaps} Confirmed Joint Inquiries</span>
         </div>
+      </div>
+
+      {/* Geospatial Hotspot Map */}
+      <div className="space-y-3">
+        <GisHotspotMap />
       </div>
 
       {/* Visual Charts Row 1: Line trends & Category Bar */}
@@ -342,6 +360,13 @@ export const AnalyticsPage: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Executive Board Meeting Dossier Modal */}
+      <ExecutiveDossierModal
+        isOpen={executiveDossierOpen}
+        onClose={() => setExecutiveDossierOpen(false)}
+        analyticsData={data}
+      />
     </div>
   );
 };

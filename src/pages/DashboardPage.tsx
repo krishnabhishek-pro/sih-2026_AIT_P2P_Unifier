@@ -34,6 +34,7 @@ import { MetricCard } from '../components/common/MetricCard';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { PriorityBadge } from '../components/common/PriorityBadge';
 import { BureauBadge } from '../components/common/BureauBadge';
+import { SlaEscalationBar } from '../components/common/SlaEscalationBar';
 import { ComplaintDetailsModal } from './ComplaintDetailsModal';
 import { DashboardStats, Complaint } from '../types';
 
@@ -90,10 +91,23 @@ export const DashboardPage: React.FC = () => {
             Real-time inter-bureau tracking, statutory compliance, and collision detection across technical institutions.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => navigate('/hearings')}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 font-bold text-xs transition-all"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Joint Hearings</span>
+          </button>
+          <button
+            onClick={() => navigate('/analytics')}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 font-bold text-xs transition-all"
+          >
+            <span>GIS Hotspots</span>
+          </button>
           <button
             onClick={() => navigate('/overlaps')}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-sm transition-all"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-sm transition-all"
           >
             <GitCompareArrows className="w-4 h-4" />
             <span>Overlap Center ({metrics.potentialOverlaps})</span>
@@ -363,7 +377,7 @@ export const DashboardPage: React.FC = () => {
                 <th className="py-3 px-4">Institution Name</th>
                 <th className="py-3 px-4">Category</th>
                 <th className="py-3 px-4">Assigned Bureau</th>
-                <th className="py-3 px-4">Date Received</th>
+                <th className="py-3 px-4 w-36">Statutory SLA (30d)</th>
                 <th className="py-3 px-4">Priority</th>
                 <th className="py-3 px-4">Current Status</th>
                 <th className="py-3 px-4 text-right">Action</th>
@@ -381,12 +395,8 @@ export const DashboardPage: React.FC = () => {
                   <td className="py-3 px-4">
                     <BureauBadge code={c.bureau.code} name={c.bureau.name} />
                   </td>
-                  <td className="py-3 px-4 text-slate-500 whitespace-nowrap">
-                    {new Date(c.dateReceived).toLocaleDateString('en-IN', {
-                      day: '2-digit',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
+                  <td className="py-3 px-4 w-36">
+                    <SlaEscalationBar complaint={c} variant="compact" />
                   </td>
                   <td className="py-3 px-4">
                     <PriorityBadge priority={c.priority} />

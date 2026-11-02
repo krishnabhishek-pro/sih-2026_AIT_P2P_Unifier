@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Shield,
   Layers,
+  Scale,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
@@ -59,6 +60,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => 
       icon: GitCompareArrows,
       badge: potentialOverlapsCount > 0 ? potentialOverlapsCount : null,
       badgeColor: 'bg-amber-500 text-white',
+    },
+    {
+      name: 'Joint Hearings',
+      path: '/hearings',
+      icon: Scale,
+      badge: 'Live',
+      badgeColor: 'bg-emerald-600 text-white',
     },
     { name: 'Bureau Management', path: '/bureaus', icon: Briefcase },
     { name: 'Analytics & Reports', path: '/analytics', icon: BarChart3 },

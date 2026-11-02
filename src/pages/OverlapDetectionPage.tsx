@@ -23,6 +23,7 @@ import { StatusBadge } from '../components/common/StatusBadge';
 import { PriorityBadge } from '../components/common/PriorityBadge';
 import { Modal } from '../components/common/Modal';
 import { ComplaintDetailsModal } from './ComplaintDetailsModal';
+import { AiNoticeGeneratorModal } from '../components/complaints/AiNoticeGeneratorModal';
 import { CaseOverlap, OverlapStatus } from '../types';
 
 export const OverlapDetectionPage: React.FC = () => {
@@ -45,6 +46,7 @@ export const OverlapDetectionPage: React.FC = () => {
 
   // Deep inspect individual complaint
   const [inspectComplaintId, setInspectComplaintId] = useState<string | null>(null);
+  const [jointNoticeOverlap, setJointNoticeOverlap] = useState<CaseOverlap | null>(null);
 
   const fetchOverlaps = async () => {
     try {
@@ -342,8 +344,15 @@ export const OverlapDetectionPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     {statusBadge}
+                    <button
+                      onClick={() => setJointNoticeOverlap(ov)}
+                      className="px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 font-bold text-xs transition-colors flex items-center gap-1"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Joint Notice</span>
+                    </button>
                     <button
                       onClick={() => {
                         setSelectedOverlap(ov);
@@ -635,6 +644,15 @@ export const OverlapDetectionPage: React.FC = () => {
           complaintId={inspectComplaintId}
           onClose={() => setInspectComplaintId(null)}
           onUpdate={fetchOverlaps}
+        />
+      )}
+
+      {/* Joint Show-Cause Notice Modal */}
+      {jointNoticeOverlap && (
+        <AiNoticeGeneratorModal
+          overlap={jointNoticeOverlap}
+          onClose={() => setJointNoticeOverlap(null)}
+          onNoticeIssued={fetchOverlaps}
         />
       )}
     </div>

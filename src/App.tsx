@@ -12,6 +12,7 @@ import { NotificationsPage } from './pages/NotificationsPage';
 import { UserManagementPage } from './pages/UserManagementPage';
 import { AuditLogsPage } from './pages/AuditLogsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { JointHearingWorkbenchPage } from './pages/JointHearingWorkbenchPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 
@@ -54,6 +55,7 @@ export function App() {
             <Route path="institutions" element={<InstitutionsPage />} />
             <Route path="complaints" element={<ComplaintsPage />} />
             <Route path="overlaps" element={<OverlapDetectionPage />} />
+            <Route path="hearings" element={<JointHearingWorkbenchPage />} />
             <Route path="bureaus" element={<BureauManagementPage />} />
             <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
