@@ -16,6 +16,7 @@ router.get('/', authenticateJWT, async (_req, res) => {
 
     const sanitized = users.map((u) => ({
       id: u.id,
+      employeeId: u.employeeId,
       name: u.name,
       email: u.email,
       role: u.role,
@@ -37,7 +38,7 @@ router.get('/', authenticateJWT, async (_req, res) => {
 // POST Add User
 router.post('/', authenticateJWT, requireRole(['SUPER_ADMIN']), async (req: AuthRequest, res) => {
   try {
-    const { name, email, password, role, designation, bureauId, region, phone } = req.body;
+    const { employeeId, name, email, password, role, designation, bureauId, region, phone } = req.body;
 
     if (!name || !email || !password || !role || !designation) {
       return res.status(400).json({ error: 'Name, email, password, role, and designation are required' });
@@ -48,10 +49,17 @@ router.post('/', authenticateJWT, requireRole(['SUPER_ADMIN']), async (req: Auth
       return res.status(409).json({ error: 'User with this email already registered' });
     }
 
+    let finalEmployeeId = employeeId?.trim();
+    if (!finalEmployeeId) {
+      const userCount = await prisma.user.count();
+      finalEmployeeId = `AICTE/EMP/2026/${(userCount + 101).toString()}`;
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
       data: {
+        employeeId: finalEmployeeId,
         name,
         email,
         passwordHash,

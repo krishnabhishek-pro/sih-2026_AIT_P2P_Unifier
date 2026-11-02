@@ -61,6 +61,7 @@ router.get('/demo-users', async (_req, res) => {
 
     const sanitized = users.map((u) => ({
       id: u.id,
+      employeeId: u.employeeId,
       name: u.name,
       email: u.email,
       role: u.role,
@@ -72,6 +73,116 @@ router.get('/demo-users', async (_req, res) => {
     }));
 
     res.json(sanitized);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// NEW USER ID CREATION / PROVISIONING ENDPOINT
+router.post('/register', async (req, res) => {
+  try {
+    const {
+      employeeId,
+      name,
+      email,
+      phone,
+      password,
+      role = 'BUREAU_OFFICER',
+      designation,
+      bureauId,
+      region,
+      captchaAnswer,
+      expectedCaptcha,
+    } = req.body;
+
+    // Validate CAPTCHA
+    if (!captchaAnswer || !expectedCaptcha || captchaAnswer.trim().toLowerCase() !== expectedCaptcha.trim().toLowerCase()) {
+      return res.status(400).json({ error: 'Security CAPTCHA verification failed. Please check the code.' });
+    }
+
+    if (!name || !email || !password || !phone || !designation) {
+      return res.status(400).json({ error: 'Mandatory fields missing: Full Name, Official Email, Phone Number, Designation, and Password are required.' });
+    }
+
+    // Validate Phone (at least 10 digits)
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.length < 10) {
+      return res.status(400).json({ error: 'Please enter a valid 10-digit mobile number for 2FA SMS delivery.' });
+    }
+
+    // Auto-generate employeeId if not supplied
+    let finalEmployeeId = employeeId?.trim();
+    if (!finalEmployeeId) {
+      const userCount = await prisma.user.count();
+      const code = bureauId ? 'BUR' : 'HQ';
+      finalEmployeeId = `AICTE/${code}/2026/${(userCount + 101).toString()}`;
+    }
+
+    // Check duplicate email
+    const existingEmail = await prisma.user.findUnique({
+      where: { email: email.trim().toLowerCase() },
+    });
+    if (existingEmail) {
+      return res.status(409).json({ error: 'An official account with this Email ID already exists.' });
+    }
+
+    // Check duplicate employeeId
+    const existingEmpId = await prisma.user.findFirst({
+      where: { employeeId: finalEmployeeId },
+    });
+    if (existingEmpId) {
+      return res.status(409).json({ error: `An official account with User ID "${finalEmployeeId}" is already registered.` });
+    }
+
+    // Hash Password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Create user in database
+    const newUser = await prisma.user.create({
+      data: {
+        employeeId: finalEmployeeId,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        phone: phone.trim().startsWith('+91') ? phone.trim() : `+91-${cleanPhone.slice(-10)}`,
+        passwordHash,
+        role,
+        designation: designation.trim(),
+        bureauId: bureauId || null,
+        region: region || 'Central HQ (New Delhi)',
+        avatar: `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random() * 90000000)}?w=150`,
+      },
+      include: { bureau: true },
+    });
+
+    // Record in Audit Trail
+    await prisma.auditLog.create({
+      data: {
+        userId: newUser.id,
+        userName: newUser.name,
+        userRole: newUser.role,
+        action: 'USER_REGISTERED',
+        entityType: 'User',
+        entityId: newUser.employeeId || newUser.id,
+        details: `Self-registered official user account created. User ID: ${newUser.employeeId}, Email: ${newUser.email}, Role: ${newUser.role}, Bureau: ${newUser.bureau?.code || 'HQ'}.`,
+        ipAddress: req.ip || '127.0.0.1',
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: `Official User ID ${newUser.employeeId} registered successfully! You may now sign in using your credentials.`,
+      user: {
+        id: newUser.id,
+        employeeId: newUser.employeeId,
+        name: newUser.name,
+        email: newUser.email,
+        phone: newUser.phone,
+        role: newUser.role,
+        designation: newUser.designation,
+        bureau: newUser.bureau,
+        region: newUser.region,
+      },
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -91,11 +202,12 @@ router.post('/verify-step1', async (req, res) => {
       return res.status(400).json({ error: 'Security CAPTCHA verification failed. Please enter the characters shown.' });
     }
 
-    // Lookup user by email or username
+    // Lookup user by email OR employeeId OR username
     const user = await prisma.user.findFirst({
       where: {
         OR: [
           { email: loginId.trim().toLowerCase() },
+          { employeeId: loginId.trim() },
           { name: { contains: loginId.trim() } },
         ],
       },

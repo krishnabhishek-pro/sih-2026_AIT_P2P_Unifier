@@ -149,3 +149,4 @@ export const CaptchaBox: React.FC<CaptchaBoxProps> = ({ onCaptchaChange }) => {
     </div>
   );
 };
+

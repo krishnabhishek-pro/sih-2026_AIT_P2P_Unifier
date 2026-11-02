@@ -59,6 +59,7 @@ export async function seedDatabase() {
 
   const usersData = [
     {
+      employeeId: 'AICTE/HQ/001',
       name: 'Dr. Abhay Jere',
       email: 'admin@aicte.gov.in',
       passwordHash: defaultPasswordHash,
@@ -69,6 +70,7 @@ export async function seedDatabase() {
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
     },
     {
+      employeeId: 'AICTE/HQ/002',
       name: 'Prof. T. G. Sitharam',
       email: 'senior.official@aicte.gov.in',
       passwordHash: defaultPasswordHash,
@@ -79,6 +81,7 @@ export async function seedDatabase() {
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
     },
     {
+      employeeId: 'AICTE/AB/010',
       name: 'Dr. Ramesh Chandra Verma',
       email: 'head.approval@aicte.gov.in',
       passwordHash: defaultPasswordHash,
@@ -90,6 +93,7 @@ export async function seedDatabase() {
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
     },
     {
+      employeeId: 'AICTE/RGRB/020',
       name: 'Dr. Anand K. Kulkarni',
       email: 'head.grievance@aicte.gov.in',
       passwordHash: defaultPasswordHash,
@@ -101,6 +105,7 @@ export async function seedDatabase() {
       avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
     },
     {
+      employeeId: 'AICTE/PAPB/030',
       name: 'Prof. Sunita Sundaram',
       email: 'head.policy@aicte.gov.in',
       passwordHash: defaultPasswordHash,
@@ -112,6 +117,7 @@ export async function seedDatabase() {
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
     },
     {
+      employeeId: 'AICTE/ROAC/040',
       name: 'Shri Vikramaditya Rathore',
       email: 'head.regional@aicte.gov.in',
       passwordHash: defaultPasswordHash,
@@ -123,6 +129,7 @@ export async function seedDatabase() {
       avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150',
     },
     {
+      employeeId: 'AICTE/AB/050',
       name: 'Dr. Manoj Sharma',
       email: 'officer.sharma@aicte.gov.in',
       passwordHash: defaultPasswordHash,
@@ -134,6 +141,7 @@ export async function seedDatabase() {
       avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150',
     },
     {
+      employeeId: 'AICTE/RGRB/060',
       name: 'Smt. Priya Nair',
       email: 'officer.nair@aicte.gov.in',
       passwordHash: defaultPasswordHash,
@@ -145,6 +153,7 @@ export async function seedDatabase() {
       avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
     },
     {
+      employeeId: 'AICTE/PAPB/070',
       name: 'Dr. Rajesh Deshmukh',
       email: 'officer.deshmukh@aicte.gov.in',
       passwordHash: defaultPasswordHash,
@@ -156,6 +165,7 @@ export async function seedDatabase() {
       avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',
     },
     {
+      employeeId: 'AICTE/ROAC/080',
       name: 'Shri Arvind Swaminathan',
       email: 'regional.south@aicte.gov.in',
       passwordHash: defaultPasswordHash,

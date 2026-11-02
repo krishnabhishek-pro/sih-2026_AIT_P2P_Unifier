@@ -7,6 +7,7 @@ export type UserRole =
 
 export interface User {
   id: string;
+  employeeId?: string | null;
   name: string;
   email: string;
   role: UserRole;

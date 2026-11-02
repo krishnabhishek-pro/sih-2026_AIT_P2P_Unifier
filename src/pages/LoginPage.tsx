@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Shield,
   Lock,
@@ -504,6 +504,16 @@ export const LoginPage: React.FC = () => {
                 <span>{isLoading ? 'Verifying & Generating OTP...' : 'Verify Credentials & Request OTP'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
+
+              {/* Link to New User ID Creation / Provisioning */}
+              <div className="text-center pt-2 border-t border-slate-100">
+                <p className="text-xs text-slate-600">
+                  New Official?{' '}
+                  <Link to="/register" className="text-blue-600 font-bold hover:underline">
+                    Create User ID / Register Official Account →
+                  </Link>
+                </p>
+              </div>
             </form>
           )}
 

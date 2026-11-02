@@ -23,6 +23,7 @@ export const UserManagementPage: React.FC = () => {
   // Add User Modal
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newUser, setNewUser] = useState({
+    employeeId: '',
     name: '',
     email: '',
     password: 'aicte@123',
@@ -141,25 +142,29 @@ export const UserManagementPage: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50/75 border-b border-slate-200 text-slate-600 uppercase font-semibold">
               <tr>
+                <th className="py-3 px-4">User ID</th>
                 <th className="py-3 px-4">Official Name</th>
                 <th className="py-3 px-4">Designation</th>
                 <th className="py-3 px-4">Role Permission</th>
                 <th className="py-3 px-4">Bureau / Jurisdiction</th>
                 <th className="py-3 px-4">Email Address</th>
-                <th className="py-3 px-4">Region</th>
+                <th className="py-3 px-4">Phone (2FA)</th>
                 <th className="py-3 px-4 text-center">Security Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500">
+                  <td colSpan={8} className="py-12 text-center text-slate-500">
                     Loading users directory...
                   </td>
                 </tr>
               ) : (
                 users.map((u) => (
                   <tr key={u.id} className="hover:bg-slate-50">
+                    <td className="py-3.5 px-4 font-mono font-bold text-blue-700 whitespace-nowrap">
+                      {u.employeeId || 'AICTE/EMP/HQ'}
+                    </td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
@@ -167,7 +172,7 @@ export const UserManagementPage: React.FC = () => {
                         </div>
                         <div>
                           <p className="font-bold text-slate-900">{u.name}</p>
-                          <p className="text-[10px] text-slate-400">{u.phone || '+91-11-29581000'}</p>
+                          <p className="text-[10px] text-slate-400">{u.region || 'Central HQ'}</p>
                         </div>
                       </div>
                     </td>
@@ -185,7 +190,7 @@ export const UserManagementPage: React.FC = () => {
                       )}
                     </td>
                     <td className="py-3.5 px-4 font-mono text-slate-600">{u.email}</td>
-                    <td className="py-3.5 px-4 text-slate-600">{u.region || 'Central HQ'}</td>
+                    <td className="py-3.5 px-4 font-mono text-slate-600">{u.phone || '+91-11-29581000'}</td>
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1 text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full text-[10px]">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -214,27 +219,52 @@ export const UserManagementPage: React.FC = () => {
               {addError}
             </div>
           )}
-          <div>
-            <label className="block font-bold text-slate-700 mb-1">Full Name & Title *</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Dr. Rajesh K. Sharma"
-              value={newUser.name}
-              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-              className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">User / Employee ID *</label>
+              <input
+                type="text"
+                placeholder="e.g. AICTE/AB/2026/088"
+                value={newUser.employeeId}
+                onChange={(e) => setNewUser({ ...newUser, employeeId: e.target.value.toUpperCase() })}
+                className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-mono font-bold uppercase"
+              />
+            </div>
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Full Name & Title *</label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Dr. Rajesh K. Sharma"
+                value={newUser.name}
+                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block font-bold text-slate-700 mb-1">Official NIC/AICTE Email *</label>
-            <input
-              type="email"
-              required
-              placeholder="e.g. officer.sharma@aicte.gov.in"
-              value={newUser.email}
-              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-              className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Official NIC/AICTE Email *</label>
+              <input
+                type="email"
+                required
+                placeholder="officer.sharma@aicte.gov.in"
+                value={newUser.email}
+                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg"
+              />
+            </div>
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Mobile Phone (2FA) *</label>
+              <input
+                type="tel"
+                required
+                placeholder="e.g. 9876543210"
+                value={newUser.phone}
+                onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                className="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-mono"
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

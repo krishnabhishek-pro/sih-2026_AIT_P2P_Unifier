@@ -12,6 +12,7 @@ datasource db {
 
 model User {
   id           String    @id @default(uuid())
+  employeeId   String?   @unique // Official AICTE/NIC Employee User ID (e.g. "AICTE/EMP/2026/001")
   name         String
   email        String    @unique
   passwordHash String
