@@ -1,0 +1,43 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node dependencies
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment variables
+.env
+
+# Large binaries & installers
+*.dmg
+*.zip
+*.tar.gz
+
+# Unrelated temporary workspace scrap files
+NIRF_*
+nirf_*
+generate_excel*
+colleges
+devdash
+ecell ignite
+researchpaperdti
+SIH
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

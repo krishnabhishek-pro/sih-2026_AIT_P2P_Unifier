@@ -1,0 +1,175 @@
+// AICTE Unified Grievance Monitoring System (AUGMS)
+// PostgreSQL Prisma Schema (Production Mode)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         String    // SUPER_ADMIN, SENIOR_OFFICIAL, BUREAU_HEAD, BUREAU_OFFICER, REGIONAL_OFFICER
+  designation  String
+  bureauId     String?
+  bureau       Bureau?   @relation(fields: [bureauId], references: [id])
+  region       String?   // Northern, Southern, Western, Eastern, Central, North-West, South-West
+  phone        String?
+  avatar       String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  assignedComplaints Complaint[] @relation("AssignedOfficer")
+}
+
+model Bureau {
+  id          String   @id @default(uuid())
+  code        String   @unique // AB, PAPB, RGRB, ROAC
+  name        String
+  description String
+  headName    String?
+  headEmail   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  complaints  Complaint[]
+}
+
+model Institution {
+  id                 String      @id @default(uuid())
+  aicteId            String      @unique // e.g. "1-10948321"
+  name               String
+  type               String      // Government, Private/Self-Financing, Deemed University, Autonomous, Polytechnic
+  state              String
+  district           String
+  address            String
+  pinCode            String
+  contactPerson      String?
+  email              String?
+  phone              String?
+  website            String?
+  approvalYear       Int         @default(2000)
+  status             String      @default("Active") // Active, Under Scrutiny, Suspended
+  totalComplaints    Int         @default(0)
+  pendingComplaints  Int         @default(0)
+  resolvedComplaints Int         @default(0)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  complaints         Complaint[]
+  overlaps           CaseOverlap[]
+}
+
+model Complaint {
+  id                 String               @id @default(uuid())
+  complaintNo        String               @unique // e.g. "AICTE/GRV/2026/0142"
+  institutionId      String
+  institution        Institution          @relation(fields: [institutionId], references: [id])
+  bureauId           String
+  bureau             Bureau               @relation(fields: [bureauId], references: [id])
+  assignedOfficerId  String?
+  assignedOfficer    User?                @relation("AssignedOfficer", fields: [assignedOfficerId], references: [id])
+  complainantType    String               // Faculty, Student, Parent, Staff, Public, Whistleblower
+  complainantName    String?              // Anonymized/Protected as per AICTE whistleblower policy
+  complainantEmail   String?
+  complainantPhone   String?
+  category           String               // Faculty Salary & Service Matters, Excess Fee & Capitation, Unapproved Intake & Courses, Infrastructure Deficiencies, Harassment & Victimization, Admission Irregularities
+  priority           String               @default("MEDIUM") // URGENT, HIGH, MEDIUM, LOW
+  status             String               @default("PENDING") // PENDING, UNDER_REVIEW, ACTION_INITIATED, SHOW_CAUSE_ISSUED, COMMITTEE_HEARING, RESOLVED, CLOSED, OVERDUE
+  title              String
+  description        String               @db.Text
+  dateReceived       DateTime             @default(now())
+  dueDate            DateTime
+  resolvedAt         DateTime?
+  source             String               @default("DIRECT_PORTAL") // CPGRAMS, RTI, DIRECT_PORTAL, COURT_ORDER, REGIONAL_OFFICE, WHISTLEBLOWER
+  remarks            String?              @db.Text
+  crossBureauLinked  Boolean              @default(false)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  actions            ComplaintAction[]
+  documents          ComplaintDocument[]
+  originalOverlaps   CaseOverlap[]        @relation("OriginalComplaint")
+  relatedOverlaps    CaseOverlap[]        @relation("RelatedComplaint")
+}
+
+model ComplaintAction {
+  id            String    @id @default(uuid())
+  complaintId   String
+  complaint     Complaint @relation(fields: [complaintId], references: [id])
+  performedById String?
+  performerName String
+  performerRole String
+  actionType    String    // STATUS_UPDATE, ASSIGNED, REASSIGNED, TRANSFERRED, REMARK_ADDED, SHOW_CAUSE, HEARING_SCHEDULED, RESOLVED, OVERLAP_LINKED
+  previousStatus String?
+  newStatus     String?
+  remarks       String    @db.Text
+  createdAt     DateTime  @default(now())
+}
+
+model CaseOverlap {
+  id                    String      @id @default(uuid())
+  originalComplaintId   String
+  originalComplaint     Complaint   @relation("OriginalComplaint", fields: [originalComplaintId], references: [id])
+  relatedComplaintId    String
+  relatedComplaint      Complaint   @relation("RelatedComplaint", fields: [relatedComplaintId], references: [id])
+  institutionId         String
+  institution           Institution @relation(fields: [institutionId], references: [id])
+  originalBureauId      String
+  relatedBureauId       String
+  matchScore            Int         // 0 - 100
+  reasons               String      @db.Text // JSON stringified array of reasons
+  status                String      @default("POTENTIAL") // POTENTIAL, CONFIRMED, REJECTED, UNDER_REVIEW
+  reviewedById          String?
+  reviewedByName        String?
+  reviewedAt            DateTime?
+  reviewDecisionRemarks String?     @db.Text
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+}
+
+model ComplaintDocument {
+  id          String    @id @default(uuid())
+  complaintId String
+  complaint   Complaint @relation(fields: [complaintId], references: [id])
+  title       String
+  fileName    String
+  fileUrl     String
+  fileType    String
+  fileSize    String
+  uploadedBy  String
+  createdAt   DateTime  @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String?  // null if broadcast to all officials
+  title     String
+  message   String   @db.Text
+  type      String   // COMPLAINT_ASSIGNED, OVERLAP_ALERT, STATUS_CHANGE, DUE_DATE_WARNING, BUREAU_TRANSFER
+  isRead    Boolean  @default(false)
+  linkUrl   String?
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  userName   String
+  userRole   String
+  action     String   // LOGIN, COMPLAINT_STATUS_UPDATED, OVERLAP_CONFIRMED, BUREAU_TRANSFERRED, OFFICER_REASSIGNED, etc.
+  entityType String   // Complaint, Overlap, Institution, User, Auth
+  entityId   String?
+  details    String   @db.Text
+  ipAddress  String   @default("127.0.0.1")
+  createdAt  DateTime @default(now())
+}
+
